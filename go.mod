@@ -1,8 +1,9 @@
-module github.com/blocktree/go-owcrypt
+module github.com/coming-chat/go-owcrypt
 
 go 1.13
 
 require (
+	github.com/blocktree/go-owcrypt v1.1.13
 	github.com/drand/kyber v1.1.4
 	github.com/phoreproject/bls v0.0.0-20200525203911-a88a5ae26844
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
