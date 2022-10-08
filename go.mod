@@ -1,4 +1,4 @@
-module github.com/blocktree/go-owcrypt
+module github.com/coming-chat/go-owcrypt
 
 go 1.13
 
