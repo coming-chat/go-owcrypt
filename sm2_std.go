@@ -33,7 +33,7 @@ var sm2_std *sm2_stdCurve
 
 type sm2_stdCurve struct {
 	*elliptic.CurveParams
-	RInverse *big.Int
+	RInverse     *big.Int
 	a, b, gx, gy sm2_stdFieldElement
 }
 
@@ -48,9 +48,9 @@ const (
 func initsm2_stdParam() {
 	sm2_std = &sm2_stdCurve{CurveParams: &elliptic.CurveParams{Name: "sm2_std"}}
 	A, _ := new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC", 16)
-	sm2_std.P, _  = new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF", 16)
-	sm2_std.N, _  = new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123", 16)
-	sm2_std.B, _  = new(big.Int).SetString("28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93", 16)
+	sm2_std.P, _ = new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF", 16)
+	sm2_std.N, _ = new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123", 16)
+	sm2_std.B, _ = new(big.Int).SetString("28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93", 16)
 	sm2_std.Gx, _ = new(big.Int).SetString("32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7", 16)
 	sm2_std.Gy, _ = new(big.Int).SetString("BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0", 16)
 	sm2_std.RInverse, _ = new(big.Int).SetString("7ffffffd80000002fffffffe000000017ffffffe800000037ffffffc80000002", 16)
@@ -127,7 +127,6 @@ func (curve sm2_stdCurve) ScalarBaseMult(k []byte) (*big.Int, *big.Int) {
 	sm2_stdScalarBaseMult(&X, &Y, &Z, &scalarReversed)
 	return sm2_stdToAffine(&X, &Y, &Z)
 }
-
 
 var sm2_stdPrecomputed = [9 * 2 * 15 * 2]uint32{
 	0x830053d, 0x328990f, 0x6c04fe1, 0xc0f72e5, 0x1e19f3c, 0x666b093, 0x175a87b, 0xec38276, 0x222cf4b,
@@ -389,7 +388,7 @@ func sm2_stdScalarMult(xOut, yOut, zOut, x, y *sm2_stdFieldElement, scalar *[32]
 		} else {
 			index >>= 4
 		}
-		
+
 		sm2_stdSelectJacobianPoint(&px, &py, &pz, &precomp, index)
 		sm2_stdPointAdd(xOut, yOut, zOut, &px, &py, &pz, &tx, &ty, &tz)
 		sm2_stdCopyConditional(xOut, &px, nIsInfinityMask)
@@ -1063,7 +1062,7 @@ func sm2_std_sign(priv *ecdsa.PrivateKey, hash, uid []byte) (r, s *big.Int, v by
 	if N.Sign() == 0 {
 		return nil, nil, 0, ErrUnknownCurve
 	}
-	var k , ry *big.Int
+	var k, ry *big.Int
 
 	for {
 		for {
@@ -1267,21 +1266,21 @@ func ka_kdf(point *ecdsa.PublicKey, Zinitiator, Zresponder []byte, keyLengthbit 
 	y := make([]byte, 32)
 
 	tmpBytes := point.X.Bytes()
-	copy(x[32 - len(tmpBytes):], tmpBytes)
+	copy(x[32-len(tmpBytes):], tmpBytes)
 	tmpBytes = point.Y.Bytes()
-	copy(y[32 - len(tmpBytes):], tmpBytes)
+	copy(y[32-len(tmpBytes):], tmpBytes)
 
 	generator := make([]byte, 4)
 
 	var hlen1 uint32
 
-	if keyLengthbit % 256 == 0 {
+	if keyLengthbit%256 == 0 {
 		hlen1 = uint32(keyLengthbit / 256)
 	} else {
-		hlen1 = uint32(keyLengthbit / 256) + 1
+		hlen1 = uint32(keyLengthbit/256) + 1
 	}
 
-	for i := uint32(1); i <= hlen1; i ++ {
+	for i := uint32(1); i <= hlen1; i++ {
 		generator[0] = byte((i >> 24) & 0xff)
 		generator[1] = byte((i >> 16) & 0xff)
 		generator[2] = byte((i >> 8) & 0xff)
@@ -1294,11 +1293,10 @@ func ka_kdf(point *ecdsa.PublicKey, Zinitiator, Zresponder []byte, keyLengthbit 
 		h.Write(Zresponder)
 		h.Write(generator)
 
-
 		if keyLengthbit >= 256 {
 			key = append(key, h.Sum(nil)...)
 		} else {
-			key = append(key, h.Sum(nil)[:keyLengthbit / 8]...)
+			key = append(key, h.Sum(nil)[:keyLengthbit/8]...)
 		}
 
 		keyLengthbit -= 256
@@ -1312,9 +1310,9 @@ func ka_check(value byte, Zinitiator, Zresponder, Rinitiator, Rresponder []byte,
 	y := make([]byte, 32)
 
 	tmpBytes := UV.X.Bytes()
-	copy(x[32 - len(tmpBytes):], tmpBytes)
+	copy(x[32-len(tmpBytes):], tmpBytes)
 	tmpBytes = UV.Y.Bytes()
-	copy(y[32 - len(tmpBytes):], tmpBytes)
+	copy(y[32-len(tmpBytes):], tmpBytes)
 
 	h := sm3.New()
 	h.Write(x)
@@ -1332,7 +1330,6 @@ func ka_check(value byte, Zinitiator, Zresponder, Rinitiator, Rresponder []byte,
 
 }
 
-
 func sm2_std_ka_initiaor_step1() (tmpPrikeyInitiator, tmpPubkeyInitiator []byte) {
 	tmpPrikeyInitiator = make([]byte, 32)
 
@@ -1348,15 +1345,15 @@ func sm2_std_ka_initiaor_step1() (tmpPrikeyInitiator, tmpPubkeyInitiator []byte)
 }
 
 func sm2_std_ka_initiator_step2(IDinitiator []byte,
-								IDresponder []byte,
-								prikeyInitiator []byte,
-								pubkeyInitiator []byte,
-								pubkeyResponder []byte,
-								tmpPrikeyInitiator []byte,
-								tmpPubkeyInitiator []byte,
-								tmpPubkeyResponder []byte,
-								Sin []byte,
-								keylen uint16,) (key, Sout []byte, err error){
+	IDresponder []byte,
+	prikeyInitiator []byte,
+	pubkeyInitiator []byte,
+	pubkeyResponder []byte,
+	tmpPrikeyInitiator []byte,
+	tmpPubkeyInitiator []byte,
+	tmpPubkeyResponder []byte,
+	Sin []byte,
+	keylen uint16) (key, Sout []byte, err error) {
 
 	if tmpPubkeyResponder == nil || len(tmpPubkeyResponder) != 64 {
 		err = errors.New("invalid responder's tmp public key")
@@ -1429,7 +1426,7 @@ func sm2_std_ka_initiator_step2(IDinitiator []byte,
 		err = errors.New("invalid initiator ID")
 		return
 	}
-	Zinitiator, err  := ZA(pubInit, IDinitiator)
+	Zinitiator, err := ZA(pubInit, IDinitiator)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -1442,7 +1439,7 @@ func sm2_std_ka_initiator_step2(IDinitiator []byte,
 		return nil, nil, err
 	}
 
-	key = ka_kdf(point1, Zinitiator, Zresponder, keylen * 8)
+	key = ka_kdf(point1, Zinitiator, Zresponder, keylen*8)
 
 	s_check := ka_check(0x02, Zinitiator, Zresponder, tmpPubkeyInitiator, tmpPubkeyResponder, point1)
 
@@ -1451,7 +1448,7 @@ func sm2_std_ka_initiator_step2(IDinitiator []byte,
 		return
 	}
 
-	for i := 0; i < 32; i ++ {
+	for i := 0; i < 32; i++ {
 		if s_check[i] != Sin[i] {
 			err = errors.New("check failed")
 			return
@@ -1464,13 +1461,13 @@ func sm2_std_ka_initiator_step2(IDinitiator []byte,
 }
 
 func sm2_std_ka_responder_step1(IDinitiator []byte,
-								IDresponder []byte,
-								prikeyResponder []byte,
-								pubkeyResponder []byte,
-								pubkeyInitiator []byte,
-								tmpPubkeyInitiator []byte,
-								random []byte,
-								keylen uint16) (key, tmpPubkeyResponder, Sinner, Souter []byte, err error){
+	IDresponder []byte,
+	prikeyResponder []byte,
+	pubkeyResponder []byte,
+	pubkeyInitiator []byte,
+	tmpPubkeyInitiator []byte,
+	random []byte,
+	keylen uint16) (key, tmpPubkeyResponder, Sinner, Souter []byte, err error) {
 	if tmpPubkeyInitiator == nil || len(tmpPubkeyInitiator) != 64 {
 		err = errors.New("invalid initiator's tmp public key")
 		return
@@ -1494,7 +1491,7 @@ func sm2_std_ka_responder_step1(IDinitiator []byte,
 		randbig.Mod(randbig, sm2_std.N)
 		tmp = randbig.Bytes()
 		copy(tmpPriResponder[32-len(tmp):], tmp)
-		} else {
+	} else {
 		if len(random) != 32 {
 			err = errors.New("invalid length of random")
 			return
@@ -1560,7 +1557,7 @@ func sm2_std_ka_responder_step1(IDinitiator []byte,
 		err = errors.New("invalid initiator ID")
 		return
 	}
-	Zinitiator, err  := ZA(pubInit, IDinitiator)
+	Zinitiator, err := ZA(pubInit, IDinitiator)
 	if err != nil {
 		return
 	}
@@ -1573,7 +1570,7 @@ func sm2_std_ka_responder_step1(IDinitiator []byte,
 		return
 	}
 
-	key = ka_kdf(point1, Zinitiator, Zresponder, keylen * 8)
+	key = ka_kdf(point1, Zinitiator, Zresponder, keylen*8)
 
 	Sinner = ka_check(0x03, Zinitiator, Zresponder, tmpPubkeyInitiator, tmpPubkeyResponder, point1)
 	Souter = ka_check(0x02, Zinitiator, Zresponder, tmpPubkeyInitiator, tmpPubkeyResponder, point1)
@@ -1584,14 +1581,14 @@ func sm2_std_ka_responder_step1(IDinitiator []byte,
 
 func sm2_std_ka_responder_step2(Sinitiator, Sresponder []byte) error {
 	if Sinitiator == nil || len(Sinitiator) != 32 {
-		return  errors.New("invalid check data of initiator")
+		return errors.New("invalid check data of initiator")
 	}
 
 	if Sresponder == nil || len(Sresponder) != 32 {
 		return errors.New("invalid check data of responder")
 	}
 
-	for i := 0; i < 32; i ++ {
+	for i := 0; i < 32; i++ {
 		if Sinitiator[i] != Sresponder[i] {
 			return errors.New("check failed")
 		}
@@ -1604,8 +1601,8 @@ func getLastBit(a *big.Int) uint {
 	return a.Bit(0)
 }
 
-func sm2_std_decompress(in []byte) ([]byte, error){
-	if in == nil || len(in) != 33 || (in[0] != 0x02 && in[0] != 0x03){
+func sm2_std_decompress(in []byte) ([]byte, error) {
+	if in == nil || len(in) != 33 || (in[0] != 0x02 && in[0] != 0x03) {
 		return nil, errors.New("invalid input")
 	}
 
@@ -1622,7 +1619,7 @@ func sm2_std_decompress(in []byte) ([]byte, error){
 	var y, x3b, xa big.Int
 	x3b.Mul(x, x)
 	x3b.Mul(&x3b, x)
-	xa.SetBytes([]byte{0xFF,0xFF,0xFF,0xFE,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFC})
+	xa.SetBytes([]byte{0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC})
 	xa.Mul(&xa, x)
 	x3b.Add(&x3b, c.B)
 	x3b.Add(&x3b, &xa)
@@ -1646,7 +1643,6 @@ func sm2_std_decompress(in []byte) ([]byte, error){
 
 }
 
-
 func sm2_std_recover_public(sig, msg []byte) ([]byte, error) {
 
 	if sig == nil || msg == nil || len(sig) != 65 || len(msg) != 32 {
@@ -1669,7 +1665,7 @@ func sm2_std_recover_public(sig, msg []byte) ([]byte, error) {
 	G.X = curve.Gx
 	G.Y = curve.Gy
 
-	for k := 0; k < 2; k ++ {
+	for k := 0; k < 2; k++ {
 		if k == 0 {
 			buf2[0] = 0x02
 		}
@@ -1690,7 +1686,10 @@ func sm2_std_recover_public(sig, msg []byte) ([]byte, error) {
 			}
 		}
 
-		buf1 := PointDecompress(buf2, ECC_CURVE_SM2_STANDARD)
+		buf1, err := sm2_std_decompress(buf2)
+		if err != nil {
+			buf1 = nil
+		}
 
 		R.Curve = curve
 		R.X = new(big.Int).SetBytes(buf1[1:33])

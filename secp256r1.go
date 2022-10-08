@@ -25,16 +25,16 @@ var secp256r1 *curveParam
 
 func initsecp256r1Param() {
 	secp256r1 = &curveParam{elliptic.CurveParams{Name: "secp256r1"}}
-	secp256r1.P, _  = new(big.Int).SetString("ffffffff00000001000000000000000000000000ffffffffffffffffffffffff", 16)
-	secp256r1.N, _  = new(big.Int).SetString("ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551", 16)
-	secp256r1.B, _  = new(big.Int).SetString("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16)
+	secp256r1.P, _ = new(big.Int).SetString("ffffffff00000001000000000000000000000000ffffffffffffffffffffffff", 16)
+	secp256r1.N, _ = new(big.Int).SetString("ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551", 16)
+	secp256r1.B, _ = new(big.Int).SetString("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16)
 	secp256r1.Gx, _ = new(big.Int).SetString("6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296", 16)
 	secp256r1.Gy, _ = new(big.Int).SetString("4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5", 16)
 	secp256r1.BitSize = 256
 }
 
 func secp256r1_decompress(in []byte) ([]byte, error) {
-	if in == nil || len(in) != 33 || (in[0] != 0x02 && in[0] != 0x03){
+	if in == nil || len(in) != 33 || (in[0] != 0x02 && in[0] != 0x03) {
 		return nil, errors.New("invalid input")
 	}
 
@@ -51,7 +51,7 @@ func secp256r1_decompress(in []byte) ([]byte, error) {
 	var y, x3b, xa big.Int
 	x3b.Mul(x, x)
 	x3b.Mul(&x3b, x)
-	xa.SetBytes([]byte{0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFC})
+	xa.SetBytes([]byte{0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC})
 	xa.Mul(&xa, x)
 	x3b.Add(&x3b, c.B)
 	x3b.Add(&x3b, &xa)
@@ -96,7 +96,7 @@ func secp256r1_recover_public(sig, msg []byte) ([]byte, error) {
 	G.X = curve.Gx
 	G.Y = curve.Gy
 
-	for k := 0; k < 2; k ++ {
+	for k := 0; k < 2; k++ {
 		if k == 0 {
 			buf2[0] = 0x02
 		}
@@ -117,7 +117,10 @@ func secp256r1_recover_public(sig, msg []byte) ([]byte, error) {
 			}
 		}
 
-		buf1 := PointDecompress(buf2, ECC_CURVE_SECP256R1)
+		buf1, err := secp256r1_decompress(buf2)
+		if err != nil {
+			buf1 = nil
+		}
 
 		R.Curve = curve
 		R.X = new(big.Int).SetBytes(buf1[1:33])
